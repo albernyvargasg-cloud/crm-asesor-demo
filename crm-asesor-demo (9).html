@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Asesor — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --navy:#0A1628;--navy2:#0F1E35;--navy3:#162035;
+  --ciel:#68D7FF;--turq:#90FFD9;--azul:#2F4D8A;
+  --ok:#22C55E;--warn:#F59E0B;--err:#EF4444;
+  --t1:#E8F4FF;--t2:#7AA0C4;--t3:#3d5872;
+  --bdr:rgba(104,215,255,.1);
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--navy);font-family:'Inter',sans-serif;}
+
+/* ── PROGRESS BAR ─────────────────────────────────────────────────────── */
+#progress-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--ciel),var(--turq));z-index:1000;transition:width .1s linear;width:0%;}
+
+/* ── SCENE WRAPPER ────────────────────────────────────────────────────── */
+#demo{width:100%;height:100vh;position:relative;overflow:hidden;}
+
+/* ── SCENE ────────────────────────────────────────────────────────────── */
+.scene{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(30px);
+  transition:opacity .6s ease,transform .6s ease;
+  pointer-events:none;
+  padding:40px 32px;
+}
+.scene.active{opacity:1;transform:translateY(0);pointer-events:all;}
+.scene.exit{opacity:0;transform:translateY(-30px);}
+
+/* ── SCENE 1: INTRO ───────────────────────────────────────────────────── */
+#s1{background:var(--navy);justify-content:center;}
+.brand{text-align:center;}
+.brand-logo{font-family:'Montserrat',sans-serif;font-size:72px;font-weight:800;line-height:1;letter-spacing:-3px;}
+.brand-logo .crm{color:var(--ciel);}
+.brand-logo .asesor{color:var(--turq);}
+.brand-tagline{font-size:16px;color:var(--t2);margin-top:12px;letter-spacing:2px;text-transform:uppercase;}
+.brand-sub{font-size:13px;color:var(--t3);margin-top:8px;}
+.intro-badges{display:flex;gap:12px;margin-top:32px;justify-content:center;flex-wrap:wrap;}
+.badge{background:rgba(47,77,138,.4);border:1px solid var(--bdr);border-radius:30px;padding:8px 18px;font-size:12px;color:var(--t2);display:flex;align-items:center;gap:6px;}
+.badge span{color:var(--ciel);}
+
+/* ── PHONE MOCKUP ─────────────────────────────────────────────────────── */
+.phone-wrap{position:relative;display:flex;gap:48px;align-items:center;justify-content:center;width:100%;}
+.phone{
+  width:240px;height:480px;background:var(--navy2);border-radius:32px;
+  border:2px solid var(--bdr);position:relative;overflow:hidden;
+  box-shadow:0 40px 80px rgba(0,0,0,.5),0 0 0 1px rgba(104,215,255,.1);
+  flex-shrink:0;
+}
+.phone-notch{width:80px;height:20px;background:var(--navy);border-radius:0 0 12px 12px;position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:10;}
+.phone-screen{padding:28px 14px 14px;height:100%;overflow:hidden;}
+.phone-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.phone-title{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--ciel);}
+.phone-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.phone-kpi{background:var(--navy3);border-radius:10px;padding:10px;border:1px solid var(--bdr);}
+.phone-kpi .num{font-family:'Montserrat',sans-serif;font-size:22px;font-weight:800;color:var(--turq);}
+.phone-kpi .lbl{font-size:8px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+.phone-list{display:flex;flex-direction:column;gap:6px;}
+.phone-item{background:var(--navy3);border-radius:8px;padding:8px 10px;border:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;}
+.phone-item .name{font-size:10px;color:var(--t1);font-weight:500;}
+.phone-item .tag{font-size:9px;color:var(--ok);background:rgba(34,197,94,.1);border-radius:10px;padding:2px 7px;}
+.phone-nav{position:absolute;bottom:0;left:0;right:0;height:48px;background:var(--navy);border-top:1px solid var(--bdr);display:flex;justify-content:space-around;align-items:center;padding:0 8px;}
+.phone-nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:16px;}
+.phone-nav-item .nlb{font-size:8px;color:var(--t3);}
+.phone-nav-item.active .nlb{color:var(--ciel);}
+
+/* ── DESKTOP MOCKUP ───────────────────────────────────────────────────── */
+.desktop{
+  width:580px;height:360px;background:var(--navy2);border-radius:12px;
+  border:2px solid var(--bdr);overflow:hidden;
+  box-shadow:0 40px 80px rgba(0,0,0,.5);
+  flex-shrink:0;
+}
+.desktop-bar{height:28px;background:var(--navy);display:flex;align-items:center;padding:0 12px;gap:6px;}
+.desktop-dot{width:10px;height:10px;border-radius:50%;}
+.desktop-inner{display:flex;height:calc(100% - 28px);}
+.desktop-sidebar{width:140px;background:var(--navy);border-right:1px solid var(--bdr);padding:14px 10px;flex-shrink:0;}
+.desktop-logo{font-family:'Montserrat',sans-serif;font-size:14px;font-weight:800;color:var(--ciel);margin-bottom:16px;letter-spacing:-0.5px;}
+.desktop-logo span{color:var(--turq);}
+.desktop-nav-item{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;font-size:10px;color:var(--t2);margin-bottom:2px;cursor:pointer;}
+.desktop-nav-item.active{background:rgba(47,77,138,.5);color:var(--ciel);}
+.desktop-content{flex:1;padding:16px;overflow:hidden;}
+.desktop-header{font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;color:var(--t1);margin-bottom:12px;}
+.desktop-header span{color:var(--ciel);}
+.desktop-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.desktop-kpi{background:var(--navy);border-radius:8px;padding:10px;border:1px solid var(--bdr);}
+.desktop-kpi .num{font-family:'Montserrat',sans-serif;font-size:18px;font-weight:800;}
+.desktop-kpi .lbl{font-size:8px;color:var(--t3);margin-top:2px;}
+.desktop-table{background:var(--navy);border-radius:8px;overflow:hidden;border:1px solid var(--bdr);}
+.desktop-table-row{display:grid;grid-template-columns:2fr 1.5fr 1fr 1fr;gap:8px;padding:7px 10px;border-bottom:1px solid var(--bdr);font-size:9px;}
+.desktop-table-row.header{color:var(--t3);font-size:8px;text-transform:uppercase;letter-spacing:.5px;}
+.desktop-table-row:not(.header){color:var(--t1);}
+
+/* ── FEATURE CARDS ────────────────────────────────────────────────────── */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%;max-width:700px;}
+.feat-card{
+  background:var(--navy2);border:1px solid var(--bdr);border-radius:16px;
+  padding:20px;text-align:center;
+  transform:translateY(20px);opacity:0;
+  animation:fadeUp .5s ease forwards;
+}
+.feat-card:nth-child(1){animation-delay:.1s;}
+.feat-card:nth-child(2){animation-delay:.25s;}
+.feat-card:nth-child(3){animation-delay:.4s;}
+.feat-card:nth-child(4){animation-delay:.55s;}
+.feat-card:nth-child(5){animation-delay:.7s;}
+.feat-card:nth-child(6){animation-delay:.85s;}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+.feat-icon{font-size:28px;margin-bottom:10px;}
+.feat-title{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--ciel);margin-bottom:6px;}
+.feat-desc{font-size:11px;color:var(--t2);line-height:1.5;}
+
+/* ── PRICE SCENE ──────────────────────────────────────────────────────── */
+.price-wrap{display:flex;gap:16px;justify-content:center;width:100%;max-width:700px;}
+.price-card{
+  background:var(--navy2);border:1px solid var(--bdr);border-radius:20px;
+  padding:24px 20px;text-align:center;flex:1;
+  transform:scale(.9);opacity:0;
+  animation:popIn .4s ease forwards;
+}
+.price-card:nth-child(1){animation-delay:.1s;}
+.price-card:nth-child(2){animation-delay:.3s;border-color:var(--ciel);box-shadow:0 0 30px rgba(104,215,255,.15);}
+.price-card:nth-child(3){animation-delay:.5s;}
+@keyframes popIn{to{opacity:1;transform:scale(1);}}
+.price-label{font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.price-amount{font-family:'Montserrat',sans-serif;font-size:32px;font-weight:800;color:var(--turq);margin-bottom:4px;}
+.price-desc{font-size:10px;color:var(--t3);margin-bottom:14px;font-style:italic;}
+.price-items{text-align:left;display:flex;flex-direction:column;gap:5px;}
+.price-item{font-size:10px;color:var(--t2);display:flex;align-items:center;gap:6px;}
+.price-item::before{content:'✓';color:var(--ok);font-weight:700;}
+.popular-tag{background:linear-gradient(135deg,var(--azul),var(--ciel));color:#fff;font-size:9px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:8px;letter-spacing:.5px;}
+
+/* ── CTA SCENE ────────────────────────────────────────────────────────── */
+.cta-wrap{text-align:center;max-width:600px;}
+.cta-title{font-family:'Montserrat',sans-serif;font-size:42px;font-weight:800;color:var(--t1);line-height:1.1;margin-bottom:16px;}
+.cta-title span{color:var(--ciel);}
+.cta-sub{font-size:15px;color:var(--t2);margin-bottom:32px;line-height:1.6;}
+.cta-whatsapp{
+  display:inline-flex;align-items:center;gap:12px;
+  background:linear-gradient(135deg,#25D366,#128C7E);
+  color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:18px;
+  padding:16px 36px;border-radius:50px;text-decoration:none;
+  box-shadow:0 8px 30px rgba(37,211,102,.3);
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{box-shadow:0 8px 30px rgba(37,211,102,.3);}50%{box-shadow:0 8px 50px rgba(37,211,102,.5);}}
+.cta-price-note{margin-top:20px;font-size:13px;color:var(--t3);}
+.cta-price-note strong{color:var(--turq);}
+
+/* ── COUNTER ANIMATION ────────────────────────────────────────────────── */
+.counter{display:inline-block;}
+
+/* ── SCENE LABELS ─────────────────────────────────────────────────────── */
+.scene-label{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  display:flex;gap:8px;z-index:100;
+}
+.scene-dot{width:8px;height:8px;border-radius:50%;background:var(--t3);transition:all .3s;}
+.scene-dot.active{background:var(--ciel);width:24px;border-radius:4px;}
+
+/* ── PARTICLES ────────────────────────────────────────────────────────── */
+.particle{position:absolute;pointer-events:none;border-radius:50%;opacity:.3;animation:float linear infinite;}
+@keyframes float{0%{transform:translateY(100vh) rotate(0deg);}100%{transform:translateY(-100px) rotate(360deg);}}
+
+/* ── CHART BAR ────────────────────────────────────────────────────────── */
+.chart-wrap{display:flex;align-items:flex-end;gap:8px;height:80px;padding:0 8px;}
+.chart-bar{flex:1;border-radius:4px 4px 0 0;animation:growBar .8s ease forwards;transform-origin:bottom;}
+@keyframes growBar{from{height:0;}to{height:var(--h);}}
+
+/* ── TYPING EFFECT ────────────────────────────────────────────────────── */
+.typing::after{content:'|';animation:blink .7s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+
+/* ── GLOW ─────────────────────────────────────────────────────────────── */
+.glow{box-shadow:0 0 40px rgba(104,215,255,.2);}
+
+/* ── ANIMATED NUMBERS ─────────────────────────────────────────────────── */
+@keyframes countUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── SCENE TRANSITIONS ────────────────────────────────────────────────── */
+.slide-title{font-family:'Montserrat',sans-serif;font-size:28px;font-weight:800;color:var(--t1);margin-bottom:6px;text-align:center;}
+.slide-title span{color:var(--ciel);}
+.slide-sub{font-size:13px;color:var(--t2);margin-bottom:28px;text-align:center;max-width:500px;}
+
+/* ── SKIP BUTTON ──────────────────────────────────────────────────────── */
+#skip-btn{
+  position:fixed;top:16px;right:20px;z-index:200;
+  background:rgba(47,77,138,.5);border:1px solid var(--bdr);
+  color:var(--t2);font-size:11px;padding:6px 14px;border-radius:20px;
+  cursor:pointer;font-family:'Inter',sans-serif;
+  transition:all .2s;
+}
+#skip-btn:hover{background:rgba(47,77,138,.8);color:var(--t1);}
+
+/* ── LOGO WATERMARK ───────────────────────────────────────────────────── */
+#watermark{
+  position:fixed;top:16px;left:20px;z-index:200;
+  font-family:'Montserrat',sans-serif;font-size:16px;font-weight:800;
+  color:rgba(104,215,255,.6);letter-spacing:-0.5px;
+}
+
+/* ── MOBILE RESPONSIVE ───────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  .scene { padding: 20px 16px; }
+
+  /* Intro */
+  .brand-logo { font-size: 48px !important; }
+  .intro-badges { gap: 8px; }
+  .badge { font-size: 11px; padding: 6px 12px; }
+
+  /* Desktop mockup → escalar */
+  .desktop {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 280px;
+  }
+  .desktop-inner { flex-direction: column; }
+  .desktop-sidebar { display: none; }
+  .desktop-content { padding: 10px; }
+  .desktop-kpis { grid-template-columns: 1fr 1fr !important; gap: 6px; }
+  .desktop-kpi .num { font-size: 14px !important; }
+  .desktop-header { font-size: 13px; margin-bottom: 8px; }
+
+  /* Phone mockup */
+  .phone-wrap { flex-direction: column; gap: 16px; }
+  .phone { width: 200px !important; height: 400px !important; }
+  .phone-wrap > div:last-child { display: none; }
+
+  /* Features grid */
+  .features-grid { grid-template-columns: 1fr 1fr !important; gap: 10px; }
+  .feat-card { padding: 14px 10px; }
+  .feat-icon { font-size: 22px; }
+  .feat-title { font-size: 11px; }
+  .feat-desc { font-size: 10px; }
+
+  /* Price cards */
+  .price-wrap { flex-direction: column; gap: 10px; max-width: 100%; }
+  .price-card { padding: 16px 14px; }
+  .price-amount { font-size: 24px !important; }
+
+  /* CTA */
+  .cta-title { font-size: 28px !important; }
+  .cta-sub { font-size: 13px; }
+  .cta-whatsapp { font-size: 15px; padding: 14px 24px; }
+
+  /* Slide titles */
+  .slide-title { font-size: 20px !important; }
+  .slide-sub { font-size: 11px; margin-bottom: 16px; }
+
+  /* Scene dots */
+  .scene-label { bottom: 10px; }
+}
+
+@media (max-width: 400px) {
+  .brand-logo { font-size: 38px !important; }
+  .features-grid { grid-template-columns: 1fr !important; }
+  .desktop-kpis { grid-template-columns: 1fr 1fr !important; }
+  .cta-title { font-size: 24px !important; }
+}
+
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+<div id="watermark">CRM<span style="color:rgba(144,255,217,.6);">Asesor</span></div>
+<button id="skip-btn" onclick="skipScene()">Saltar →</button>
+
+<div class="scene-label" id="scene-dots"></div>
+
+<div id="demo">
+
+<!-- ESCENA 1: INTRO / MARCA -->
+<div class="scene active" id="s1">
+  <div class="brand">
+    <div class="brand-logo"><span class="crm">CRM</span><span class="asesor">Asesor</span></div>
+    <div class="brand-tagline">Tu cartera, siempre bajo control</div>
+    <div class="brand-sub">El CRM especializado para asesores de seguros en Colombia</div>
+    <div class="intro-badges">
+      <div class="badge">📱 <span>Móvil y escritorio</span></div>
+      <div class="badge">☁️ <span>Accede desde donde estés</span></div>
+      <div class="badge">🔒 <span>Tus datos, tu control</span></div>
+      <div class="badge">💰 <span>Un solo pago</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ESCENA 2: DASHBOARD DESKTOP -->
+<div class="scene" id="s2">
+  <div class="slide-title">Panel <span>Principal</span></div>
+  <div class="slide-sub">Todo tu portafolio en una sola pantalla</div>
+  <div class="desktop glow">
+    <div class="desktop-bar">
+      <div class="desktop-dot" style="background:#ef4444;"></div>
+      <div class="desktop-dot" style="background:#f59e0b;"></div>
+      <div class="desktop-dot" style="background:#22c55e;"></div>
+    </div>
+    <div class="desktop-inner">
+      <div class="desktop-sidebar">
+        <div class="desktop-logo">CRM<span>Asesor</span></div>
+        <div class="desktop-nav-item active">🏠 Inicio</div>
+        <div class="desktop-nav-item">👥 Clientes</div>
+        <div class="desktop-nav-item">📄 Pólizas</div>
+        <div class="desktop-nav-item">📊 Informes</div>
+        <div class="desktop-nav-item">💰 Comisiones</div>
+        <div class="desktop-nav-item">✅ Tareas</div>
+        <div class="desktop-nav-item">⚙️ Config</div>
+      </div>
+      <div class="desktop-content">
+        <div class="desktop-header">Panel <span>Principal</span></div>
+        <div class="desktop-kpis">
+          <div class="desktop-kpi"><div class="num" style="color:var(--ciel);" id="d-cli">0</div><div class="lbl">Clientes</div></div>
+          <div class="desktop-kpi"><div class="num" style="color:var(--turq);" id="d-pol">0</div><div class="lbl">Pólizas</div></div>
+          <div class="desktop-kpi"><div class="num" style="color:var(--warn);" id="d-cob">0</div><div class="lbl">Por Cobrar</div></div>
+          <div class="desktop-kpi"><div class="num" style="color:var(--ok);" id="d-ren">0</div><div class="lbl">Por Renovar</div></div>
+        </div>
+        <div class="desktop-table">
+          <div class="desktop-table-row header"><span>Cliente</span><span>Póliza</span><span>Vence</span><span>Estado</span></div>
+          <div class="desktop-table-row"><span>Carlos M.</span><span>Vida Individual</span><span style="color:var(--warn)">15 días</span><span style="color:var(--ok)">●  Vigente</span></div>
+          <div class="desktop-table-row"><span>María R.</span><span>Autos SURA</span><span style="color:var(--ok)">45 días</span><span style="color:var(--ok)">●  Vigente</span></div>
+          <div class="desktop-table-row"><span>Pedro W.</span><span>Salud Familiar</span><span style="color:var(--err)">3 días</span><span style="color:var(--err)">●  Urgente</span></div>
+          <div class="desktop-table-row"><span>FOEMSOMA</span><span>Autos/Flota</span><span style="color:var(--ok)">60 días</span><span style="color:var(--ok)">●  Vigente</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ESCENA 3: VISTA MÓVIL -->
+<div class="scene" id="s3">
+  <div class="slide-title">Funciona en tu <span>celular</span></div>
+  <div class="slide-sub">Gestiona tu cartera desde donde estés, sin instalar nada</div>
+  <div class="phone-wrap">
+    <div class="phone glow">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="phone-topbar">
+          <div class="phone-title">Panel Principal</div>
+          <div style="font-size:16px;">🔔</div>
+        </div>
+        <div class="phone-kpis">
+          <div class="phone-kpi"><div class="num" id="m-cli">87</div><div class="lbl">Clientes</div></div>
+          <div class="phone-kpi"><div class="num" id="m-pol" style="color:var(--ciel);">114</div><div class="lbl">Pólizas</div></div>
+          <div class="phone-kpi"><div class="num" style="color:var(--warn);">5</div><div class="lbl">Por Cobrar</div></div>
+          <div class="phone-kpi"><div class="num" style="color:var(--ok);">12</div><div class="lbl">Renovar</div></div>
+        </div>
+        <div class="phone-list">
+          <div class="phone-item"><span class="name">Carlos Naranjo</span><span class="tag">Vigente</span></div>
+          <div class="phone-item"><span class="name">María Restrepo</span><span class="tag">Vigente</span></div>
+          <div class="phone-item"><span class="name">FOEMSOMA SAS</span><span class="tag" style="color:var(--warn);background:rgba(245,158,11,.1);">15 días</span></div>
+          <div class="phone-item"><span class="name">Pedro Wills</span><span class="tag" style="color:var(--err);background:rgba(239,68,68,.1);">Urgente</span></div>
+        </div>
+      </div>
+      <div class="phone-nav">
+        <div class="phone-nav-item active"><span>🏠</span><span class="nlb">Inicio</span></div>
+        <div class="phone-nav-item"><span>👥</span><span class="nlb">Clientes</span></div>
+        <div class="phone-nav-item"><span>📄</span><span class="nlb">Pólizas</span></div>
+        <div class="phone-nav-item"><span>🔍</span><span class="nlb">Buscar</span></div>
+        <div class="phone-nav-item"><span>⋯</span><span class="nlb">Más</span></div>
+      </div>
+    </div>
+    <div style="max-width:260px;">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="background:var(--navy2);border:1px solid var(--bdr);border-radius:14px;padding:16px;">
+          <div style="font-size:12px;font-weight:600;color:var(--ciel);margin-bottom:6px;">📱 Barra de navegación inferior</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.6;">Accede a todos los módulos desde la barra inferior. Sin sidebar que ocupe espacio.</div>
+        </div>
+        <div style="background:var(--navy2);border:1px solid var(--bdr);border-radius:14px;padding:16px;">
+          <div style="font-size:12px;font-weight:600;color:var(--turq);margin-bottom:6px;">⚡ Sin instalación</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.6;">Solo abre el link en Chrome. Funciona en iPhone, Android y tablet.</div>
+        </div>
+        <div style="background:var(--navy2);border:1px solid var(--bdr);border-radius:14px;padding:16px;">
+          <div style="font-size:12px;font-weight:600;color:var(--warn);margin-bottom:6px;">🔔 Alertas de vencimiento</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.6;">Ve qué pólizas vencen en 15, 30 y 90 días. No pierdas ninguna renovación.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ESCENA 4: INFORMES -->
+<div class="scene" id="s4">
+  <div class="slide-title">Informes de <span>producción</span></div>
+  <div class="slide-sub">Sabe exactamente cuánto produces y cuánto ganas</div>
+  <div class="desktop glow" style="width:620px;">
+    <div class="desktop-bar">
+      <div class="desktop-dot" style="background:#ef4444;"></div>
+      <div class="desktop-dot" style="background:#f59e0b;"></div>
+      <div class="desktop-dot" style="background:#22c55e;"></div>
+    </div>
+    <div class="desktop-inner" style="padding:16px;flex-direction:column;">
+      <div style="display:flex;gap:8px;border-bottom:1px solid var(--bdr);margin-bottom:14px;padding-bottom:10px;">
+        <div style="padding:4px 12px;background:rgba(47,77,138,.5);border-radius:6px;font-size:10px;color:var(--ciel);border:1px solid var(--azul);">📊 Resumen</div>
+        <div style="padding:4px 12px;font-size:10px;color:var(--t3);">🏢 Aseguradora</div>
+        <div style="padding:4px 12px;font-size:10px;color:var(--t3);">📋 Ramo</div>
+        <div style="padding:4px 12px;font-size:10px;color:var(--t3);">👤 Canal</div>
+        <div style="padding:4px 12px;font-size:10px;color:var(--t3);">📅 Mensual</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
+        <div style="background:var(--navy);border-radius:8px;padding:12px;border:1px solid var(--bdr);">
+          <div style="font-size:8px;color:var(--t3);text-transform:uppercase;margin-bottom:4px;">Prima Total</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:18px;font-weight:800;color:var(--turq);">$718M</div>
+          <div style="font-size:8px;color:var(--ok);">↑ 12% vs año anterior</div>
+        </div>
+        <div style="background:var(--navy);border-radius:8px;padding:12px;border:1px solid var(--bdr);">
+          <div style="font-size:8px;color:var(--t3);text-transform:uppercase;margin-bottom:4px;">Comisión Neta</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:18px;font-weight:800;color:var(--ciel);">$92M</div>
+          <div style="font-size:8px;color:var(--ok);">↑ 8% vs año anterior</div>
+        </div>
+        <div style="background:var(--navy);border-radius:8px;padding:12px;border:1px solid var(--bdr);">
+          <div style="font-size:8px;color:var(--t3);text-transform:uppercase;margin-bottom:4px;">Renovar 90 días</div>
+          <div style="font-family:'Montserrat',sans-serif;font-size:18px;font-weight:800;color:var(--warn);">23</div>
+          <div style="font-size:8px;color:var(--warn);">pólizas por renovar</div>
+        </div>
+      </div>
+      <div style="background:var(--navy);border-radius:8px;padding:12px;border:1px solid var(--bdr);">
+        <div style="font-size:9px;color:var(--t3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Producción por ramo</div>
+        <div style="display:flex;align-items:flex-end;gap:6px;height:60px;">
+          <div style="flex:1;background:linear-gradient(180deg,var(--ciel),var(--azul));border-radius:3px 3px 0 0;height:80%;position:relative;"><span style="position:absolute;bottom:-14px;width:100%;text-align:center;font-size:7px;color:var(--t3);">Vida</span></div>
+          <div style="flex:1;background:linear-gradient(180deg,var(--turq),#1a6a5c);border-radius:3px 3px 0 0;height:60%;"><span style="display:block;margin-top:100%;padding-top:4px;text-align:center;font-size:7px;color:var(--t3);">Salud</span></div>
+          <div style="flex:1;background:linear-gradient(180deg,var(--azul),var(--navy));border-radius:3px 3px 0 0;height:50%;"></div>
+          <div style="flex:1;background:linear-gradient(180deg,var(--warn),#7a4e00);border-radius:3px 3px 0 0;height:35%;"></div>
+          <div style="flex:1;background:linear-gradient(180deg,var(--ok),#0a4a1e);border-radius:3px 3px 0 0;height:25%;"></div>
+          <div style="flex:1;background:linear-gradient(180deg,#a855f7,#3b0764);border-radius:3px 3px 0 0;height:15%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ESCENA 5: MÓDULOS -->
+<div class="scene" id="s5">
+  <div class="slide-title">Todo lo que <span>necesitas</span></div>
+  <div class="slide-sub">7 módulos especializados para gestionar tu agencia completa</div>
+  <div class="features-grid">
+    <div class="feat-card"><div class="feat-icon">👥</div><div class="feat-title">Clientes</div><div class="feat-desc">Base completa con historial, contactos y estado de cartera</div></div>
+    <div class="feat-card"><div class="feat-icon">📄</div><div class="feat-title">Pólizas</div><div class="feat-desc">Alertas de vencimiento, co-corretaje y comisiones automáticas</div></div>
+    <div class="feat-card"><div class="feat-icon">📊</div><div class="feat-title">Informes</div><div class="feat-desc">Producción por aseguradora, ramo, canal y proyección a 90 días</div></div>
+    <div class="feat-card"><div class="feat-icon">💰</div><div class="feat-title">Comisiones</div><div class="feat-desc">Configuración de % por ramo y cálculo automático de ganancia</div></div>
+    <div class="feat-card"><div class="feat-icon">💳</div><div class="feat-title">Cobros</div><div class="feat-desc">Control de pagos pendientes y recaudados por cliente</div></div>
+    <div class="feat-card"><div class="feat-icon">⚙️</div><div class="feat-title">Tu marca</div><div class="feat-desc">Sube tu logo y personaliza con el nombre de tu agencia</div></div>
+  </div>
+</div>
+
+<!-- ESCENA 6: PRECIOS -->
+<div class="scene" id="s6">
+  <div class="slide-title">Planes y <span>precios</span></div>
+  <div class="slide-sub">Pago único — sin mensualidades, sin sorpresas</div>
+  <div class="price-wrap">
+    <div class="price-card">
+      <div class="price-label">Plan Básico</div>
+      <div class="price-amount">$950K</div>
+      <div class="price-desc">1 aseguradora incluida</div>
+      <div class="price-items">
+        <div class="price-item">Todos los módulos</div>
+        <div class="price-item">Clientes ilimitados</div>
+        <div class="price-item">Importación Excel</div>
+        <div class="price-item">Versión móvil</div>
+        <div class="price-item">Tu logo incluido</div>
+      </div>
+    </div>
+    <div class="price-card">
+      <div class="popular-tag">⭐ MÁS POPULAR</div>
+      <div class="price-label">Pack 5 Compañías</div>
+      <div class="price-amount">$1.4M</div>
+      <div class="price-desc">Básico + 5 aseguradoras</div>
+      <div class="price-items">
+        <div class="price-item">Todo lo del básico</div>
+        <div class="price-item">5 aseguradoras a elegir</div>
+        <div class="price-item">HDI, Bolívar, Mapfre...</div>
+        <div class="price-item">Ahorra $475.000</div>
+        <div class="price-item">Soporte 30 días</div>
+      </div>
+    </div>
+    <div class="price-card">
+      <div class="price-label">+ Aseguradora</div>
+      <div class="price-amount">$185K</div>
+      <div class="price-desc">cada compañía adicional</div>
+      <div class="price-items">
+        <div class="price-item">Ramos configurados</div>
+        <div class="price-item">% comisión incluido</div>
+        <div class="price-item">Disponible al instante</div>
+        <div class="price-item">Sin límite de adiciones</div>
+        <div class="price-item">Actualización inmediata</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ESCENA 7: CTA -->
+<div class="scene" id="s7">
+  <div class="cta-wrap">
+    <div class="cta-title">¿Listo para ordenar<br>tu <span>cartera?</span></div>
+    <div class="cta-sub">Más de 100 clientes y 114 pólizas gestionadas desde el primer día.<br>Configúralo en 24 horas y empieza a ver resultados.</div>
+    <a class="cta-whatsapp" href="https://wa.me/573108959203?text=Hola,%20quiero%20más%20información%20sobre%20CRM%20Asesor" target="_blank">
+      <span style="font-size:24px;">💬</span>
+      Escríbenos al WhatsApp
+    </a>
+    <div class="cta-price-note">Desde <strong>$950.000</strong> pago único · Sin mensualidades · Soporte 30 días incluido</div>
+    <div style="margin-top:16px;font-size:11px;color:var(--t3);">+57 310 895 9203 · Sekiury Tech · Colombia</div>
+  </div>
+</div>
+
+</div><!-- end demo -->
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const SCENES = ['s1','s2','s3','s4','s5','s6','s7'];
+const DURATIONS = [4000, 6000, 6000, 6000, 6000, 7000, 999999]; // última escena queda fija
+let current = 0;
+let timer = null;
+let totalTime = DURATIONS.slice(0,-1).reduce((a,b)=>a+b,0);
+let elapsed = 0;
+let progTimer = null;
+
+// ── DOTS ──────────────────────────────────────────────────────────────────────
+const dots = document.getElementById('scene-dots');
+SCENES.forEach((_,i) => {
+  const d = document.createElement('div');
+  d.className = 'scene-dot' + (i===0?' active':'');
+  d.id = 'dot-'+i;
+  d.onclick = () => goTo(i);
+  dots.appendChild(d);
+});
+
+function updateDots(i) {
+  document.querySelectorAll('.scene-dot').forEach((d,j) => {
+    d.classList.toggle('active', j===i);
+  });
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+function goTo(idx) {
+  if (idx < 0 || idx >= SCENES.length) return;
+  const prev = document.getElementById(SCENES[current]);
+  prev.classList.remove('active');
+  prev.classList.add('exit');
+  setTimeout(() => prev.classList.remove('exit'), 600);
+  current = idx;
+  const next = document.getElementById(SCENES[current]);
+  next.classList.add('active');
+  updateDots(current);
+  onSceneEnter(current);
+  clearTimeout(timer);
+  if (DURATIONS[current] < 999999) {
+    timer = setTimeout(() => goTo(current+1), DURATIONS[current]);
+  }
+}
+
+function skipScene() {
+  if (current < SCENES.length - 1) goTo(current + 1);
+}
+
+// ── PROGRESS BAR ──────────────────────────────────────────────────────────────
+function startProgress() {
+  const bar = document.getElementById('progress-bar');
+  let start = Date.now();
+  const total = DURATIONS.slice(0,-1).reduce((a,b)=>a+b,0);
+  function tick() {
+    const pct = Math.min(((Date.now()-start)/total)*100, 100);
+    bar.style.width = pct + '%';
+    if (pct < 100) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// ── SCENE CALLBACKS ───────────────────────────────────────────────────────────
+function onSceneEnter(idx) {
+  if (idx === 1) animateDashboardNumbers();
+  if (idx === 5) {} // prices auto-animate via CSS
+}
+
+function animateCount(el, target, duration=1500) {
+  let start = 0;
+  const step = target / (duration / 16);
+  const interval = setInterval(() => {
+    start = Math.min(start + step, target);
+    el.textContent = Math.round(start);
+    if (start >= target) clearInterval(interval);
+  }, 16);
+}
+
+function animateDashboardNumbers() {
+  setTimeout(() => {
+    animateCount(document.getElementById('d-cli'), 87);
+    animateCount(document.getElementById('d-pol'), 114);
+    animateCount(document.getElementById('d-cob'), 5);
+    animateCount(document.getElementById('d-ren'), 12);
+  }, 400);
+}
+
+// ── AUTO-RELOOP on last scene click ──────────────────────────────────────────
+document.getElementById('s7').addEventListener('click', function(e) {
+  if (!e.target.closest('a')) goTo(0);
+});
+
+// ── OCULTAR CURSOR DURANTE GRABACIÓN ─────────────────────────────────────────
+document.body.style.cursor = 'none';
+
+// ── MANTENER ANIMACIONES CON TAB INACTIVA ─────────────────────────────────────
+// Evitar que el browser pause setTimeout cuando el tab pierde foco
+const _setTimeout = window.setTimeout;
+const _setInterval = window.setInterval;
+
+// ── COUNTDOWN ANTES DE ARRANCAR ───────────────────────────────────────────────
+// ── PANTALLA DE ESPERA — presiona Enter para arrancar ────────────────────────
+let startEl = document.createElement('div');
+startEl.id = 'start-screen';
+startEl.style.cssText = 'position:fixed;inset:0;background:rgba(10,22,40,.98);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;font-family:Montserrat,sans-serif;cursor:none;';
+startEl.innerHTML = `
+  <div style="font-size:13px;color:#3d5872;letter-spacing:3px;text-transform:uppercase;margin-bottom:24px;">CRM Asesor · Demo</div>
+  <div style="font-size:64px;font-weight:800;color:#68D7FF;line-height:1;margin-bottom:8px;">CRM<span style="color:#90FFD9;">Asesor</span></div>
+  <div style="font-size:14px;color:#7AA0C4;margin-bottom:48px;">Tu cartera, siempre bajo control</div>
+  <div style="display:flex;align-items:center;gap:12px;background:rgba(47,77,138,.4);border:1px solid rgba(104,215,255,.2);border-radius:50px;padding:14px 32px;">
+    <span style="font-size:20px;">⏎</span>
+    <span style="font-size:14px;font-weight:600;color:#E8F4FF;">Presiona Enter para iniciar</span>
+  </div>
+  <div style="font-size:11px;color:#3d5872;margin-top:20px;">Activa la grabación antes de presionar Enter</div>
+`;
+document.body.appendChild(startEl);
+
+function iniciarDemo() {
+  const el = document.getElementById('start-screen');
+  if (el) {
+    el.style.opacity = '0';
+    el.style.transition = 'opacity .5s';
+    setTimeout(() => el.remove(), 500);
+  }
+  startProgress();
+  timer = setTimeout(() => goTo(1), DURATIONS[0]);
+}
+
+// Enter o clic para arrancar
+document.addEventListener('keydown', function startHandler(e) {
+  if (e.key === 'Enter') {
+    document.removeEventListener('keydown', startHandler);
+    iniciarDemo();
+  }
+});
+startEl.addEventListener('click', function() {
+  iniciarDemo();
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') skipScene();
+  if (e.key === 'ArrowLeft' && current > 0) goTo(current-1);
+});
+</script>
+</body>
+</html>
